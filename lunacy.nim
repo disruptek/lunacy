@@ -196,18 +196,9 @@ proc read*(s: LuaStack) =
   assert s.clean, "address " & $s.pos
   #raise newException(Defect, "your stack is immutable")
 
-proc read*[T: LuaStack](s: T; index: cint): T =
-  result = T(pos: LuaStackAddress(L: s.pos.L, address: index))
+proc read*(s: LuaStack; index: cint): LuaStack =
+  result = LuaStack(pos: LuaStackAddress(L: s.pos.L, address: index))
   result.read
-
-proc pop*[T: LuaStack](s: T): T =
-  assert s != nil, "attempt to pop from nil stack"
-  assert false, "unable to pop from immutable " & $s.kind & " stack"
-
-proc pop*[T: LuaStack](s: var T): T =
-  ## pop the value off the stack and return it
-  result = s.read -1
-  s.L.pop
 
 proc toTable*[T: LuaStack](s: var T): TableRef[T, T] =
   ## pull a lua table off the stack and into a stack object
@@ -314,7 +305,7 @@ proc `$`*(s: LuaStack): string =
     s.read
     case s.kind
     of TString:
-      result.add s.str.quoted
+      result.add s.str
     of TLightUserData:
       result.add "🎈" & s.data.quoted
     of TUserData:
@@ -380,12 +371,6 @@ proc newLuaStack*(kind: ValidLuaType; pos: LuaStackAddress): LuaStack =
 proc newLuaStack*(kind: ValidLuaType; address: SomeNumber): LuaStack =
   result = newLuaStack(kind, LuaStackAddress(address: address.cint))
 
-proc last*(L: PState): LuaStackAddress =
-  result = LuaStackAddress(L: L, address: -1.cint)
-
-proc last*(s: LuaStack): LuaStack =
-  result = newLuaStack(s.L.luatype(-1.cint).LuaType, s.L.last)
-
 proc contains*(s: LuaStack; i: LuaStack): bool =
   case s.kind
   of stringLovers:
@@ -446,3 +431,40 @@ proc `[]`*(s: LuaStack; index: string): LuaStack =
         break
   if result == nil:
     raise newException(KeyError, "key `" & index & "` not found")
+
+proc last*(L: PState): LuaStackAddress =
+  result = LuaStackAddress(L: L, address: -1.cint)
+
+proc last*(s: LuaStack): LuaStack =
+  result = newLuaStack(s.L.luatype(-1.cint).LuaType, s.L.last)
+
+proc pop*(s: LuaStack): LuaStack =
+  assert s != nil, "attempt to pop from nil stack"
+  assert false, "unable to pop from immutable " & $s.kind & " stack"
+
+proc pop*(p: PState): LuaStack =
+  ## read and remove the last item on the stack
+  result = LuaStack(pos: p.last)
+  result.read
+  p.remove -1
+
+proc pop*(s: var LuaStack): LuaStack =
+  ## pop the value off the stack and return it
+  result = s.L.pop
+
+when isMainModule:
+  # i think this might be our goal
+  when false:
+    let
+      vm: PState = lua:
+        {
+          foo = "bar",
+          bif = "baz",
+          bam = 34,
+        }
+  let
+    vm: PState = lua:
+      local h = "hello world"
+      print(h)
+  let s: LuaStack = vm.pop
+  echo $s
