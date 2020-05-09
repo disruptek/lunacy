@@ -30,7 +30,6 @@ echo s.toJson.pretty
 See [the documentation for the lunacy module](https://disruptek.github.io/lunacy/lunacy.html) as generated directly from the source.
 
 ## Tests
-The tests use example values from the AWS documentation as above.
 ```
 $ nimble test
 ```
