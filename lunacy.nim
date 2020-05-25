@@ -39,7 +39,7 @@ type
   LuaStackAddress* = object
     L: PState
     address: LuaStackAddressValue
-  LuaStack = ref object
+  LuaStack* = ref object
     comment*: string
     pos*: LuaStackAddress
     expand: bool
@@ -150,10 +150,17 @@ proc hash*(s: LuaStack): Hash
 converter toCint*(si: int): cint =
   si.cint
 
+proc isInteger*(s: LuaStack): bool =
+  if s.kind == TNumber:
+    if s.num == 0.0:
+      result = true
+    elif s.integer != 0:
+      result = true
+
 converter toInteger*(s: LuaStack): int =
   assert s != nil
   assert s.kind == TNumber
-  if s.num != 0.0 and s.integer == 0:
+  if not s.isInteger:
     raise newException(ValueError, "no integer for `" & $s & "`")
   result = s.integer
 
@@ -240,6 +247,13 @@ proc newLuaStack*(kind: ValidLuaType; pos: LuaStackAddress): LuaStack =
   result.init
   result.pos = pos
 
+when false:
+  proc newLuaStack(kind: ValidLuaType; i: Integer): LuaStack =
+    result = LuaStack(kind: TNumber, num: i.float, integer: i)
+
+  proc newLuaStack(kind: ValidLuaType; f: Number): LuaStack =
+    result = LuaStack(kind: TNumber, num: f)
+
 proc newLuaStack(kind: ValidLuaType; s: string): LuaStack =
   ## do not export!  cheat mode: on
   assert kind in stringLovers
@@ -278,14 +292,15 @@ proc toTable[T: LuaStack](s: var T): TableRef[T, T] =
   s.L.pushnil
   # use the last item on the stack as input to find the subsequent key
   let
-    # but subtract one if it's a reverse index like -1
+    # but subtract one if it's a reverse index like -1 (because it grew)
     index = if s.address < 0: s.address - 1 else: s.address
   while s.L.next(index) != 0.cint:
     let
       key = s.read -2
       value = s.read -1
     result.add key, value
-    s.L.pop
+    # pop the value; the remaining key is input to the next iteration
+    s.L.pop 1
 
 proc readType(pos: LuaStackAddress): LuaType =
   # use the converter...
@@ -437,7 +452,7 @@ proc `$`*(s: LuaStack): string =
       result.add "😡"
       raise newException(Defect, "this should not exist")
     of TNone:
-      result.add "⛳"
+      result.add "⛳" # a hole in none
     of TNil:
       result.add "🎎"
 
@@ -519,22 +534,22 @@ proc last*(s: LuaStack): LuaStack =
     pos = s.L.last
   result = newLuaStack(pos.readValidType, pos)
 
-proc pop*(s: LuaStack): LuaStack =
-  assert s != nil, "attempt to pop from nil stack"
-  assert false, "unable to pop from immutable " & $s.kind & " stack"
-
-proc pop*(p: PState; expand = true): LuaStack =
+proc popStack*(p: PState; expand = true): LuaStack =
   ## read and remove the last item on the stack
   let
     pos = p.last
   result = newLuaStack(pos.readValidType, pos)
   result.expand = expand
   result.read
-  p.remove -1
+  p.pop 1
+
+proc pop*(s: LuaStack): LuaStack =
+  assert s != nil, "attempt to pop from nil stack"
+  assert false, "unable to pop from immutable " & $s.kind & " stack"
 
 proc pop*(s: var LuaStack; expand = true): LuaStack =
   ## pop the value off the stack and return it
-  result = s.L.pop(expand = expand)
+  result = s.L.popStack(expand = expand)
 
 when isMainModule:
   import unittest
@@ -553,7 +568,7 @@ when isMainModule:
       let
         vm: PState = lua: return "hello world"
       var
-        s: LuaStack = vm.pop
+        s: LuaStack = vm.popStack
       check:
         s.expand == true
         s.kind == TString
@@ -583,6 +598,6 @@ when isMainModule:
           local h = "hello world"
           print(h)
       var
-        s: LuaStack = vm.pop
+        s: LuaStack = vm.popStack
       echo $s.kind
       #check $s == ""
