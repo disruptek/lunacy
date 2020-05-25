@@ -13,7 +13,7 @@ converter toJson*(s: LuaStack): JsonNode =
       result = newJNull()
     of TUserData:
       result = newJString(s.user)
-    of TUserData:
+    of TLightUserData:
       result = newJString(s.data)
     of TThread:
       result = newJString(s.thread)
