@@ -247,13 +247,6 @@ proc newLuaStack*(kind: ValidLuaType; pos: LuaStackAddress): LuaStack =
   result.init
   result.pos = pos
 
-when false:
-  proc newLuaStack(kind: ValidLuaType; i: Integer): LuaStack =
-    result = LuaStack(kind: TNumber, num: i.float, integer: i)
-
-  proc newLuaStack(kind: ValidLuaType; f: Number): LuaStack =
-    result = LuaStack(kind: TNumber, num: f)
-
 proc newLuaStack(kind: ValidLuaType; s: string): LuaStack =
   ## do not export!  cheat mode: on
   assert kind in stringLovers
