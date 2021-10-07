@@ -50,3 +50,11 @@ suite "lunacy":
       s: LuaStack = vm.popStack
     checkpoint $s.kind
     check $s == ""
+
+  test "syntax error":
+    expect LuaError:
+      discard lua: much `garbage`
+    try:
+      let vm = lua: much `garbage`
+    except LuaError as e:
+      check e.msg == """[string "much `garbage`"]:1: '=' expected near '`'"""

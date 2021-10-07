@@ -34,6 +34,7 @@ const
   hashableTypes = stringLovers + {TNumber, TTable, TBoolean}
 
 type
+  LuaError* = object of ValueError  ## raised when execution fails
   ValidLuaType* = range[LuaType.low.succ .. LuaType.high]
   LuaStackAddressValue = range[cint.low .. cleanAddress]
 
@@ -131,17 +132,32 @@ type
 
 proc `$`*(s: LuaStack): string
 
+proc popStack*(p: PState; expand = true): LuaStack
+
+proc raiseLuaError(p: PState) {.noreturn.} =
+  raise LuaError.newException:
+    $p.popStack
+
+macro checkLua*(p: PState; c: typed; logic: typed) =
+  let razor = bindSym"raiseLuaError"
+  quote:
+    if `c` == 0.cint:
+      `logic`
+    else:
+      `razor` `p`
+
 macro lua*(ast: untyped): PState =
   let
-    L = nskVar.genSym"L"
+    L = nskVar.genSym"luaVM"
     ns = bindSym"newState"
-    doString = bindSym"doString"
+    pcall = bindSym"pcall"
     body = newStrLitNode(ast.repr.strip)
-  result = quote do:
+  result = quote:
     block:
       var `L` = `ns`()
-      if `doString`(`L`, `body`) != 0.cint:
-        raise ValueError.newException "lua execution failed"
+      `L`.checkLua loadString(`L`, `body`):
+        `L`.checkLua `pcall`(`L`, 0, MultRet, 0):
+          discard
       `L`
 
 template L*(s: LuaStack): PState = s.pos.L
