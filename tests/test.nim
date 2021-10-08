@@ -13,10 +13,8 @@ suite "lunacy":
       $s == "hello world"
 
   test "harder":
-    let
-      vm: PState = lua: return "hello world"
-    var
-      s: LuaStack = vm.popStack
+    let vm = lua: return "hello world"
+    var s: LuaStack = vm.popStack
     check "harder fail":
       s.expand == true
       s.kind == TString
@@ -30,8 +28,7 @@ suite "lunacy":
           bif = "baz",
           bam = 34.0,
         }
-    var
-      s = TTable.newLuaStack(vm.last)
+    var s = TTable.newLuaStack(vm.last)
     s.read
     check "harder still fail":
       s.expand == true
@@ -41,20 +38,19 @@ suite "lunacy":
       s["bam"] == 34.0
 
   test "printing":
-    skip "not yet"
     let
-      vm: PState = lua:
+      vm = lua:
         local h = "hello world"
         print(h)
-    var
-      s: LuaStack = vm.popStack
-    checkpoint $s.kind
-    check $s == ""
+        return 3
+    var s = vm.popStack
+    check s.kind == TNumber
+    check $s == "3"
 
   test "syntax error":
     expect LuaError:
       discard lua: much `garbage`
     try:
-      let vm = lua: much `garbage`
+      discard lua: much `garbage`
     except LuaError as e:
       check e.msg == """[string "much `garbage`"]:1: '=' expected near '`'"""

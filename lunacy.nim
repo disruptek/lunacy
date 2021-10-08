@@ -1,12 +1,11 @@
 import std/macros
 import std/strutils
 import std/strformat
-import std/osproc
 import std/tables
 import std/hashes
 import std/os
 
-import lua
+import lunacy/lua
 export lua
 
 #[
@@ -71,7 +70,7 @@ type
     of TFunction:
       funny*: proc ()
 
-  LuaKeyword = enum
+  LuaKeyword {.used.} = enum
     lkAnd       = "and"
     lkBreak     = "break"
     lkDo        = "do"
@@ -95,7 +94,7 @@ type
     lkUntil     = "until"
     lkWhile     = "while"
 
-  LuaToken = enum
+  LuaToken {.used.} = enum
     ltPlus      = "+"
     ltMinus     = "-"
     ltStar      = "*"
@@ -155,6 +154,7 @@ macro lua*(ast: untyped): PState =
   result = quote:
     block:
       var `L` = `ns`()
+      `L`.openLibs()
       `L`.checkLua loadString(`L`, `body`):
         `L`.checkLua `pcall`(`L`, 0, MultRet, 0):
           discard
@@ -200,14 +200,10 @@ proc hash*(tab: Table[LuaStack, LuaStack]): Hash =
   result = !$h
 
 proc hash*(s: LuaStack): Hash =
-  assert s != nil
   var h: Hash = 0
-  block:
+  if s.kind in hashableTypes:
+    h = h !& s.kind.hash
     case s.kind
-    of TInvalid:
-      # ie. leave h == 0
-      assert false, "bad idea, bud"
-      break
     of stringLovers:
       h = h !& hash($s)
     of TNumber:
@@ -218,8 +214,6 @@ proc hash*(s: LuaStack): Hash =
       h = h !& s.truthy.hash
     else:
       discard
-    h = h !& s.kind.hash
-  assert h != 0
   result = !$h
 
 proc `==`*(a, b: LuaStack): bool =
@@ -307,11 +301,11 @@ proc toTable[T: LuaStack](s: var T): Table[T, T] =
     let
       key = s.read -2
       value = s.read -1
-    result.add key, value
+    result[key] = value
     # pop the value; the remaining key is input to the next iteration
     s.L.pop 1
 
-proc readType(pos: LuaStackAddress): LuaType =
+proc readType(pos: LuaStackAddress): LuaType {.used.} =
   # use the converter...
   result = pos.L.luatype(pos.address).toLuaType
 

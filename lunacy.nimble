@@ -3,8 +3,6 @@ author = "disruptek"
 description = "lua hacks"
 license = "MIT"
 
-requires "https://github.com/disruptek/lua##fixups2"
-
 when not defined(release):
   requires "https://github.com/disruptek/balls >= 2.0.0 & < 4.0.0"
 

@@ -6,10 +6,15 @@
 [![License](https://img.shields.io/github/license/disruptek/lunacy?style=flat)](#license)
 [![Matrix](https://img.shields.io/badge/chat-on%20matrix-brightgreen)](https://matrix.to/#/#disruptek:matrix.org)
 
+We're aiming for a high-quality integration with Lua, but it might take a
+little time to get there; point being, this API is a work in progress...
+
 ## Usage
 
+`--define:lunacyLuaJIT` to use `luajit.so`; else we'll use a 5.[01] library.
+
 ```nim
-# instantiate a lua VM
+# instantiate a lua virtual machine
 let vm =
   # the lua just returns a table
   lua:
@@ -19,14 +24,10 @@ let vm =
       bam = 34,
     }
 
-# pull an address to the table from the lua VM
-#var s = TTable.newLuaStack vm.last
+# pop the table from the lua vm
 var s = popStack vm
 
-# read the contents of the table from the VM
-read s
-
-# render it, etc.
+# we can index it as a table, render it as Lua, etc.
 assert s["foo"] == "bar"
 assert s["bam"] == 34
 assert s["bam"] == 34.0
