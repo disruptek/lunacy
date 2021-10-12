@@ -56,7 +56,7 @@ jobs:
           cd ci
           nimble --accept develop
           nimble --accept install "https://github.com/disruptek/balls"
-          env LD_LIBRARY_PATH="$HOME/.lua/lib" nimble test
+          env LD_LIBRARY_PATH="/home/runner/work/lunacy/lunacy/.lua/lib" nimble test
 
       - name: Build docs
         if: ${{ matrix.docs }} == 'true'
