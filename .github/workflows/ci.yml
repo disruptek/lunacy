@@ -29,10 +29,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-latest', 'ubuntu-latest'] #, 'windows-latest']
-        nim: ['devel', 'version-1-6'] #, 'version-1-4', 'version-1-2', 'version-1-0']
-        lua: ["5.1"] #, "luajit-2.0.5"]
-    name: '${{ matrix.os }} (${{ matrix.nim }} / ${{ matrix.lua }})'
+        #os: ['macos-latest', 'ubuntu-latest', 'windows-latest']
+        os: ['ubuntu-latest']
+        nim: ['devel'] #, 'version-1-6']
+        #lua: ["5.1", "luajit-2.0.5"]
+    #name: '${{ matrix.os }} (${{ matrix.nim }} / ${{ matrix.lua }})'
+    name: '${{ matrix.os }} (${{ matrix.nim }})'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -40,9 +42,10 @@ jobs:
         with:
           path: ci
 
-      - uses: leafo/gh-actions-lua@v8.0.0
-        with:
-          luaVersion: ${{ matrix.lua }}
+      # this just builds a static lib 🙄
+      #- uses: leafo/gh-actions-lua@v8.0.0
+      #  with:
+      #    luaVersion: ${{ matrix.lua }}
 
       - name: Setup Nim
         uses: alaviss/setup-nim@0.1.1
@@ -56,7 +59,7 @@ jobs:
           cd ci
           nimble --accept develop
           nimble --accept install "https://github.com/disruptek/balls"
-          env LD_LIBRARY_PATH="/home/runner/work/lunacy/lunacy/.lua/lib" nimble test
+          nimble test
 
       - name: Build docs
         if: ${{ matrix.docs }} == 'true'
