@@ -128,17 +128,17 @@ type
   Integer* = cint
 
   LuaType* {.size: sizeof(cint).} = enum
-    TInvalid       = (0, "invalid")
-    TNone          = (1, "none")
-    TNil           = (2, "nil")
-    TBoolean       = (3, "bool")
-    TLightUserData = (4, "light user data")
-    TNumber        = (5, "number")
-    TString        = (6, "string")
-    TTable         = (7, "table")
-    TFunction      = (8, "function")
-    TUserData      = (9, "user data")
-    TThread        = (10, "thread")
+    TInvalid       = 0
+    TNone          = 1
+    TNil           = 2
+    TBoolean       = 3
+    TLightUserData = 4
+    TNumber        = 5
+    TString        = 6
+    TTable         = 7
+    TFunction      = 8
+    TUserData      = 9
+    TThread        = 10
 
 const
   LuaTypesBegin = 1

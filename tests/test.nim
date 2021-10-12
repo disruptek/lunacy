@@ -3,7 +3,8 @@ import pkg/balls
 import lunacy
 
 suite "lunacy":
-  test "simple":
+  block:
+    ## simple
     var
       L = newState()
       s = TString.newLuaStack(L.last)
@@ -12,15 +13,17 @@ suite "lunacy":
       L.last.readValidType == TString
       $s == "hello world"
 
-  test "harder":
+  block:
+    ## harder
     let vm = lua: return "hello world"
     var s: LuaStack = vm.popStack
     check "harder fail":
       s.expand == true
       s.kind == TString
-      s.str == "hello world"
+      s.value.strung == "hello world"
 
-  test "harder still":
+  block:
+    ## harder still
     let
       vm = lua:
         return {
@@ -33,11 +36,14 @@ suite "lunacy":
     check "harder still fail":
       s.expand == true
       s.kind == TTable
-      $s == """{bif = "baz", foo = "bar", bam = 34}"""
-      s["bam"] == 34
-      s["bam"] == 34.0
+    check "rendering fail":
+      len($s) == """{bif = "baz", foo = "bar", bam = 34}""".len
+    check "value fail":
+      s.value["bam".toLuaValue].integer == 34
+      s.value["bam".toLuaValue].number == 34.0
 
-  test "printing":
+  block:
+    ## printing
     let
       vm = lua:
         local h = "hello world"
@@ -47,7 +53,8 @@ suite "lunacy":
     check s.kind == TNumber
     check $s == "3"
 
-  test "syntax error":
+  block:
+    ## syntax error
     expect LuaError:
       discard lua: much `garbage`
     try:

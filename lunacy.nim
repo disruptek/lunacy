@@ -45,30 +45,29 @@ type
     comment*: string
     pos*: LuaStackAddress
     expand*: bool
+    value*: LuaValue
+
+  LuaValue* = object
     case kind*: LuaType
-    of TInvalid:
-      discard
-    of TNone:
-      discard
-    of TNil:
+    of TInvalid, TNone, TNil:
       discard
     of TBoolean:
       truthy*: bool
     of TString:
-      str*: string
+      strung*: string
     of TNumber:
-      num*: Number
+      number*: Number
       integer*: Integer
     of TLightUserData:
       light*: string
     of TTable:
-      tab*: Table[LuaStack, LuaStack]
+      table*: Table[LuaValue, LuaValue]
     of TUserData:
       user*: string
     of TThread:
       thread*: string
     of TFunction:
-      funny*: proc ()
+      function*: pointer
 
   LuaKeyword {.used.} = enum
     lkAnd       = "and"
@@ -130,6 +129,7 @@ type
     ltDotDotDot = "..."
 
 proc `$`*(s: LuaStack): string
+proc `$`*(value: LuaValue): string
 
 proc popStack*(p: PState; expand = true): LuaStack
 
@@ -168,24 +168,38 @@ proc hash*(s: LuaStack): Hash
 converter toCint*(si: int): cint =
   si.cint
 
-proc isInteger*(s: LuaStack): bool =
-  if s.kind == TNumber:
-    if s.num == 0.0:
+func kind*(s: LuaStack): LuaType {.inline.} =
+  s.value.kind
+
+proc expectKind(value: LuaValue; kinds: set[LuaType]) =
+  if value.kind notin kinds:
+    raise LuaError.newException:
+      "expected $# but found $#" % [ $kinds, $value.kind ]
+
+template expectKind(value: LuaValue; kind: LuaType) =
+  expectKind(value, {kind})
+
+proc isInteger*(value: LuaValue): bool =
+  if value.kind == TNumber:
+    if value.number in [-0.0, 0.0]:
       result = true
-    elif s.integer != 0:
+    elif value.integer != 0:
       result = true
+
+func isInteger*(s: LuaStack): bool =
+  s.value.isInteger
 
 converter toInteger*(s: LuaStack): int =
   assert s != nil
   assert s.kind == TNumber
   if not s.isInteger:
     raise ValueError.newException &"no integer for `{s}`"
-  result = s.integer
+  result = s.value.integer
 
 converter toFloat*(s: LuaStack): float =
   assert s != nil
   assert s.kind == TNumber
-  result = s.num
+  result = s.value.number
 
 proc clean*(s: LuaStack): bool =
   result = s.pos.address == cleanAddress
@@ -207,11 +221,11 @@ proc hash*(s: LuaStack): Hash =
     of stringLovers:
       h = h !& hash($s)
     of TNumber:
-      h = h !& s.num.hash
+      h = h !& s.value.number.hash
     of TTable:
-      h = h !& s.tab.hash
+      h = h !& s.value.table.hash
     of TBoolean:
-      h = h !& s.truthy.hash
+      h = h !& s.value.truthy.hash
     else:
       discard
   result = !$h
@@ -221,6 +235,26 @@ proc `==`*(a, b: LuaStack): bool =
     result = a.isNil and b.isNil
   else:
     result = a.hash == b.hash
+
+proc hash*(v: LuaValue): Hash =
+  var h: Hash = 0
+  h = h !& v.kind.hash
+  case v.kind
+  of stringLovers:
+    h = h !& hash($v)
+  of TNumber:
+    h = h !& v.number.hash
+  of TTable:
+    h = h !& v.table.hash
+  of TBoolean:
+    h = h !& v.truthy.hash
+  else:
+    assert v.kind notin hashableTypes
+    discard
+  result = !$h
+
+proc `==`*(a, b: LuaValue): bool =
+  hash(a) == hash(b)
 
 proc `$`*(a: LuaStackAddress): string =
   result = &"[{a.address}]"
@@ -242,16 +276,18 @@ proc copy(s: LuaStack): LuaStack =
 proc newLuaStack*(kind: ValidLuaType; pos: LuaStackAddress): LuaStack =
   ## represents a stack entry as it may exist at any point in time at
   ## the given valid address
-  case kind
-  of TString:         result = LuaStack(kind: TString)
-  of TTable:          result = LuaStack(kind: TTable)
-  of TNumber:         result = LuaStack(kind: TNumber)
-  of TLightUserData:  result = LuaStack(kind: TLightUserData)
-  of TThread:         result = LuaStack(kind: TThread)
-  of TUserData:       result = LuaStack(kind: TUserData)
-  of TBoolean:        result = LuaStack(kind: TBoolean)
-  else:
-    raise ValueError.newException &"bad input: {kind}"
+  result =
+    case kind
+    of TString:         LuaStack(value: LuaValue(kind: TString))
+    of TTable:          LuaStack(value: LuaValue(kind: TTable))
+    of TNumber:         LuaStack(value: LuaValue(kind: TNumber))
+    of TLightUserData:  LuaStack(value: LuaValue(kind: TLightUserData))
+    of TThread:         LuaStack(value: LuaValue(kind: TThread))
+    of TUserData:       LuaStack(value: LuaValue(kind: TUserData))
+    of TBoolean:        LuaStack(value: LuaValue(kind: TBoolean))
+    of TNil:            LuaStack(value: LuaValue(kind: TNil))
+    else:
+      raise ValueError.newException &"bad input: {kind}"
   result.init
   result.pos = pos
 
@@ -260,13 +296,13 @@ proc newLuaStack(kind: ValidLuaType; s: string): LuaStack =
   assert kind in stringLovers
   case kind
   of TString:
-    result = LuaStack(kind: TString, str: s)
+    result = LuaStack(value: LuaValue(kind: TString, strung: s))
   of TLightUserData:
-    result = LuaStack(kind: TLightUserData, light: s)
+    result = LuaStack(value: LuaValue(kind: TLightUserData, light: s))
   of TUserData:
-    result = LuaStack(kind: TUserData, user: s)
+    result = LuaStack(value: LuaValue(kind: TUserData, user: s))
   of TThread:
-    result = LuaStack(kind: TThread, thread: s)
+    result = LuaStack(value: LuaValue(kind: TThread, thread: s))
   else:
     raise ValueError.newException "bad input"
   result.init
@@ -283,28 +319,6 @@ when false:
     result = LuaStack(kind: TNumber, num: n)
     result.init
 
-proc toTable[T: LuaStack](s: var T): Table[T, T] =
-  ## pull a lua table off the stack and into a stack object
-  # push a nil as input to the first next() call
-  assert s.L != nil
-  assert s.kind == TTable
-  assert s.dirty
-  s.L.pushnil
-  # use the last item on the stack as input to find the subsequent key
-  let # but subtract one if it's a reverse index like -1 (because it grew)
-    index =
-      if s.address < 0:
-        s.address - 1
-      else:
-        s.address
-  while s.L.next(index) != 0.cint:
-    let
-      key = s.read -2
-      value = s.read -1
-    result[key] = value
-    # pop the value; the remaining key is input to the next iteration
-    s.L.pop 1
-
 proc readType(pos: LuaStackAddress): LuaType {.used.} =
   # use the converter...
   result = pos.L.luatype(pos.address).toLuaType
@@ -316,6 +330,18 @@ proc readValidType*(pos: LuaStackAddress): ValidLuaType =
     result = typ.ValidLuaType
   else:
     raise ValueError.newException "invalid type: {typ}"
+
+proc `[]=`*(table: var LuaValue; key: LuaValue, value: LuaValue) =
+  table.expectKind TTable
+  table.table[key] = value
+
+proc `[]`*(table: var LuaValue; key: LuaValue): var LuaValue =
+  table.expectKind TTable
+  result = table.table[key]
+
+proc `[]`*(table: LuaValue; key: LuaValue): LuaValue =
+  table.expectKind TTable
+  result = table.table[key]
 
 proc read*(s: var LuaStack)
 
@@ -341,22 +367,37 @@ proc read*(s: var LuaStack) =
       s = newLuaStack(s.pos.readValidType, s.pos)
     case s.kind
     of TThread:
-      s.thread = $s.L.toString(s.address)
+      s.value.thread = $s.L.toString(s.address)
     of TLightUserData:
-      s.light = $s.L.toString(s.address)
+      s.value.light = $s.L.toString(s.address)
     of TUserData:
-      s.user = $s.L.toString(s.address)
+      s.value.user = $s.L.toString(s.address)
     of TString:
-      s.str = $s.L.toString(s.address)
+      s.value.strung = $s.L.toString(s.address)
     of TNumber:
-      s.num = s.L.toNumber(s.address)
-      if s.num != 0.0:
+      s.value.number = s.L.toNumber(s.address)
+      if s.value.number != 0.0:
         if s.expand:
-          s.integer = s.L.checkInteger(s.address)
+          s.value.integer = s.L.checkInteger(s.address)
     of TTable:
-      s.tab = s.toTable
+      # push a nil as input to the first next() call
+      s.L.pushnil
+      # use the last item on the stack as input to find the subsequent key
+      let # but subtract one if it's a reverse index like -1 (because it grew)
+        index =
+          if s.address < 0:
+            s.address - 1
+          else:
+            s.address
+      while s.L.next(index) != 0.cint:
+        let
+          key = s.read -2
+          value = s.read -1
+        s.value[key.value] = value.value
+        # pop the value; the remaining key is input to the next iteration
+        s.L.pop 1
     of TBoolean:
-      s.truthy = s.L.toBoolean(s.address) == 1.cint
+      s.value.truthy = s.L.toBoolean(s.address) == 1.cint
     of TNil, TNone, TFunction:
       discard
     of TInvalid:
@@ -373,89 +414,95 @@ when false:
     for key, val in s.tab.pairs:
       yield (key: key, val: val)
 
-iterator pairs*(s: LuaStack): tuple[key: LuaStack; val: LuaStack] =
-  assert s != nil
-  assert s.kind == TTable
-  for p in s.tab.pairs:
-    yield p
+  iterator pairs*(s: LuaStack): tuple[key: LuaStack; val: LuaStack] =
+    assert s != nil
+    assert s.kind == TTable
+    for p in s.tab.pairs:
+      yield p
 
-iterator values*(s: LuaStack): LuaStack =
-  assert s != nil
-  assert s.kind == TTable
-  for p in s.tab.values:
-    yield p
+  iterator values*(s: LuaStack): LuaStack =
+    assert s != nil
+    assert s.kind == TTable
+    for p in s.tab.values:
+      yield p
 
-iterator keys*(s: LuaStack): LuaStack =
-  assert s != nil
-  assert s.kind == TTable
-  for p in s.tab.keys:
-    yield p
+  iterator keys*(s: LuaStack): LuaStack =
+    assert s != nil
+    assert s.kind == TTable
+    for p in s.tab.keys:
+      yield p
 
 proc quoted(s: string): string =
   result.addQuoted s
 
-proc quoted(s: LuaStack): string =
-  case s.kind
+proc quoted(value: LuaValue): string =
+  case value.kind
   of TString:
-    result.addQuoted s.str
+    result.addQuoted value.strung
   else:
-    result = $s
+    result = $value
 
-proc len*(s: LuaStack): int =
+proc quoted(s: LuaStack): string =
+  quoted s.value
+
+proc len*(s: LuaStack): int {.deprecated.} =
   assert s != nil
   s.read
   case s.kind
   of TBoolean:
-    result = sizeof(s.truthy)
+    result = sizeof(s.value.truthy)
   of TNumber:
-    result = sizeof(s.num)
+    result = sizeof(s.value.number)
   of TTable:
-    result = s.tab.len
+    result = s.value.table.len
   of stringLovers:
     result = len($s)
   of TFunction:
-    if s.funny != nil:
+    if s.value.function != nil:
       result = 1
   of TNone, TNil, TInvalid:
     discard
 
+proc `$`*(value: LuaValue): string =
+  case value.kind
+  of TString:
+    result.add value.strung
+  of TLightUserData:
+    result.add "🖕" & value.light.quoted
+  of TUserData:
+    result.add "🤦" & value.user.quoted
+  of TThread:
+    result.add "🧵" & value.thread.quoted
+  of TFunction:
+    result.add "🎽"
+  of TNumber:
+    if value.isInteger:
+      result.add $value.integer
+    else:
+      result.add $value.number
+  of TBoolean:
+    result.add $value.truthy
+  of TTable:
+    for key, val in value.table.pairs:
+      if result.len > 0:
+        result.add ", "
+      result.add $key
+      result.add " = "
+      result.add val.quoted
+    result = "{" & result & "}"
+  of TInvalid:
+    result.add "😡"
+    raise Defect.newException "this should not exist"
+  of TNone:
+    result.add "⛳" # a hole in none
+  of TNil:
+    result.add "🎎"
+
 proc `$`*(s: LuaStack): string =
   if s == nil:
-    result = "🤯"
+    "🤯"
   else:
-    case s.kind
-    of TString:
-      result.add s.str
-    of TLightUserData:
-      result.add "🖕" & s.light.quoted
-    of TUserData:
-      result.add "🤦" & s.user.quoted
-    of TThread:
-      result.add "🧵" & s.thread.quoted
-    of TFunction:
-      result.add "🎽"
-    of TNumber:
-      if s.num == 0.0 or s.integer != 0:
-        result.add $s.integer
-      else:
-        result.add $s.num
-    of TBoolean:
-      result.add $s.truthy
-    of TTable:
-      for key, val in s.tab.pairs:
-        if result.len > 0:
-          result.add ", "
-        result.add $key
-        result.add " = "
-        result.add val.quoted
-      result = "{" & result & "}"
-    of TInvalid:
-      result.add "😡"
-      raise Defect.newException "this should not exist"
-    of TNone:
-      result.add "⛳" # a hole in none
-    of TNil:
-      result.add "🎎"
+    $s.value
 
 proc `$`*(s: var LuaStack): string =
   if s == nil:
@@ -472,8 +519,8 @@ proc contains*(s: LuaStack; i: LuaStack): bool =
     return contains($s, $i)
   of TTable:
     # nim bug
-    for key in s.tab.keys:
-      if key == i:
+    for key in s.value.table.keys:
+      if key == i.value:
         return true
   else:
     raise ValueError.newException "unsupported"
@@ -488,41 +535,42 @@ proc contains*(t: TableRef[LuaStack, LuaStack]; s: LuaStack): bool =
     if k == s:
       return true
 
-proc `[]`*(s: LuaStack; index: LuaStack): LuaStack =
-  assert s != nil
-  assert s.kind == TTable
-  assert index != nil
-  assert index.kind != TNil
+when false:
+  proc `[]`*(s: LuaStack; index: LuaStack): LuaStack =
+    assert s != nil
+    assert s.kind == TTable
+    assert index != nil
+    assert index.kind != TNil
 
-  # why
-  block:
-    # nim bug https://github.com/nim-lang/Nim/issues/14178
-    if false and index in s.tab:
-      #echo "has key"
-      result = s.tab[index]
-    else:
-      #echo "s ", s, s.hash
-      #echo "i ", index, index.hash
-      for key, value in s.tab.pairs:
-        if key == index:
-          result = value
-          #echo "f ", key, key.hash
-          #echo "v ", result, result.hash
-          break
-  if result == nil:
-    raise KeyError.newException "key `{index}` not found"
+    # why
+    block:
+      # nim bug https://github.com/nim-lang/Nim/issues/14178
+      if false and index in s.tab:
+        #echo "has key"
+        result = s.tab[index]
+      else:
+        #echo "s ", s, s.hash
+        #echo "i ", index, index.hash
+        for key, value in s.tab.pairs:
+          if key == index:
+            result = value
+            #echo "f ", key, key.hash
+            #echo "v ", result, result.hash
+            break
+    if result == nil:
+      raise KeyError.newException "key `{index}` not found"
 
-proc `[]`*(s: LuaStack; index: string): LuaStack =
-  assert s != nil
-  s.read
-  assert s.kind == TTable
-  for kind in stringLovers.items:
-    let find = kind.newLuaStack(index)
-    if find in s:
-      result = s[find]
-      break
-  if result == nil:
-    raise KeyError.newException "key `{index}` not found"
+  proc `[]`*(s: LuaStack; index: string): LuaStack =
+    assert s != nil
+    s.read
+    assert s.kind == TTable
+    for kind in stringLovers.items:
+      let find = kind.newLuaStack(index)
+      if find in s:
+        result = s[find]
+        break
+    if result == nil:
+      raise KeyError.newException "key `{index}` not found"
 
 proc last*(L: PState): LuaStackAddress =
   LuaStackAddress(L: L, address: -1.cint)
@@ -547,3 +595,57 @@ proc pop*(s: LuaStack): LuaStack =
 proc pop*(s: var LuaStack; expand = true): LuaStack =
   ## pop the value off the stack and return it
   s.L.popStack(expand = expand)
+
+proc nilLuaValue*(): LuaValue = LuaValue(kind: TNil)
+proc noneLuaValue*(): LuaValue = LuaValue(kind: TNone)
+proc luaValueTable*(): LuaValue = LuaValue(kind: TTable)
+
+proc toLuaValue*(i: int): LuaValue =
+  LuaValue(kind: TNumber, number: i.toFloat, integer: i)
+
+proc toLuaValue*(f: float): LuaValue =
+  LuaValue(kind: TNumber, number: f)
+
+proc toLuaValue*(s: string): LuaValue =
+  LuaValue(kind: TString, strung: s)
+
+proc toLuaValue*(b: bool): LuaValue =
+  LuaValue(kind: TBoolean, truthy: b)
+
+proc toLuaValue*[T](a: openArray[T]): LuaValue =
+  result = LuaValue(kind: TTable)
+  for i, item in a.pairs:
+    result[i.toLuaValue] = item.toLuaValue
+
+type
+  TableLike[K, V] = concept c
+    c.pairs is (V, K)
+
+proc toLuaValue*[K, V](a: TableLike[K, V]): LuaValue =
+  result = LuaValue(kind: TTable)
+  for key, value in a.pairs:
+    result[key.toLuaValue] = value.toLuaValue
+
+proc push*(L: PState; value: LuaValue): LuaStack =
+  case value.kind
+  of TBoolean:
+    L.pushBoolean value.truthy.cint
+  of TString:
+    # ensure we can push a string with an embedded nil
+    L.pushLString(value.strung, value.strung.len)
+  of TNil:
+    L.pushNil
+  of TNumber:
+    L.pushNumber value.number
+  of TTable:
+    # FIXME: exploit createTable()?
+    L.newTable
+    for key, value in value.table.pairs:
+      discard L.push key
+      discard L.push value
+      L.setTable -3
+  else:
+    raise LuaError.newException "not implemented"
+  let pos = L.last
+  assert pos.readValidType == value.kind
+  result = newLuaStack(value.kind, pos)

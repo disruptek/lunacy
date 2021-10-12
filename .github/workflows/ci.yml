@@ -31,13 +31,18 @@ jobs:
       matrix:
         os: ['windows-latest', 'macos-latest', 'ubuntu-latest']
         nim: ['devel', 'version-1-6', 'version-1-4', 'version-1-2', 'version-1-0']
-    name: '${{ matrix.os }} (${{ matrix.nim }})'
+        lua: ["luajit-2.0.5", "5.1"]
+    name: '${{ matrix.os }} (${{ matrix.nim }} / ${{ matrix.lua }})'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           path: ci
+
+      - uses: leafo/gh-actions-lua@v8.0.0
+        with:
+          luaVersion: ${{ matrix.lua }}
 
       - name: Setup Nim
         uses: alaviss/setup-nim@0.1.1
