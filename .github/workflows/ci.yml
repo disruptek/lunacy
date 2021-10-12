@@ -29,9 +29,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest', 'macos-latest', 'ubuntu-latest']
-        nim: ['devel', 'version-1-6', 'version-1-4', 'version-1-2', 'version-1-0']
-        lua: ["luajit-2.0.5", "5.1"]
+        os: ['macos-latest', 'ubuntu-latest'] #, 'windows-latest']
+        nim: ['devel', 'version-1-6'] #, 'version-1-4', 'version-1-2', 'version-1-0']
+        lua: ["5.1"] #, "luajit-2.0.5"]
     name: '${{ matrix.os }} (${{ matrix.nim }} / ${{ matrix.lua }})'
     runs-on: ${{ matrix.os }}
     steps:
