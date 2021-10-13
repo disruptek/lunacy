@@ -172,9 +172,10 @@ func kind*(s: LuaStack): LuaType {.inline.} =
   s.value.kind
 
 proc expectKind(value: LuaValue; kinds: set[LuaType]) =
-  if value.kind notin kinds:
-    raise LuaError.newException:
-      "expected $# but found $#" % [ $kinds, $value.kind ]
+  when not defined(danger):
+    if value.kind notin kinds:
+      raise LuaError.newException:
+        fmt"expected {kinds} but found {value.kind}"
 
 template expectKind(value: LuaValue; kind: LuaType) =
   expectKind(value, {kind})
@@ -191,15 +192,19 @@ func isInteger*(s: LuaStack): bool =
 
 converter toInteger*(s: LuaStack): int =
   assert s != nil
-  assert s.kind == TNumber
+  s.value.expectKind TNumber
   if not s.isInteger:
     raise ValueError.newException &"no integer for `{s}`"
   result = s.value.integer
 
 converter toFloat*(s: LuaStack): float =
   assert s != nil
-  assert s.kind == TNumber
+  s.value.expectKind TNumber
   result = s.value.number
+
+converter toFloat*(value: LuaValue): float =
+  value.expectKind TNumber
+  result = value.number
 
 proc clean*(s: LuaStack): bool =
   result = s.pos.address == cleanAddress
@@ -212,29 +217,6 @@ proc hash*(tab: Table[LuaStack, LuaStack]): Hash =
     h = h !& key.hash
     h = h !& value.hash
   result = !$h
-
-proc hash*(s: LuaStack): Hash =
-  var h: Hash = 0
-  if s.kind in hashableTypes:
-    h = h !& s.kind.hash
-    case s.kind
-    of stringLovers:
-      h = h !& hash($s)
-    of TNumber:
-      h = h !& s.value.number.hash
-    of TTable:
-      h = h !& s.value.table.hash
-    of TBoolean:
-      h = h !& s.value.truthy.hash
-    else:
-      discard
-  result = !$h
-
-proc `==`*(a, b: LuaStack): bool =
-  if a.isNil or b.isNil:
-    result = a.isNil and b.isNil
-  else:
-    result = a.hash == b.hash
 
 proc hash*(v: LuaValue): Hash =
   var h: Hash = 0
@@ -249,12 +231,23 @@ proc hash*(v: LuaValue): Hash =
   of TBoolean:
     h = h !& v.truthy.hash
   else:
-    assert v.kind notin hashableTypes
     discard
   result = !$h
 
+proc hash*(s: LuaStack): Hash =
+  hash(s.value)
+
+proc `==`*(a, b: LuaStack): bool =
+  if a.isNil or b.isNil:
+    a.isNil and b.isNil
+  else:
+    a.hash == b.hash
+
 proc `==`*(a, b: LuaValue): bool =
-  hash(a) == hash(b)
+  if a.kind == b.kind:
+    a.hash == b.hash
+  else:
+    false
 
 proc `$`*(a: LuaStackAddress): string =
   result = &"[{a.address}]"
@@ -416,19 +409,19 @@ when false:
 
   iterator pairs*(s: LuaStack): tuple[key: LuaStack; val: LuaStack] =
     assert s != nil
-    assert s.kind == TTable
+    s.value.expectKind TTable
     for p in s.tab.pairs:
       yield p
 
   iterator values*(s: LuaStack): LuaStack =
     assert s != nil
-    assert s.kind == TTable
+    s.value.expectKind TTable
     for p in s.tab.values:
       yield p
 
   iterator keys*(s: LuaStack): LuaStack =
     assert s != nil
-    assert s.kind == TTable
+    s.value.expectKind TTable
     for p in s.tab.keys:
       yield p
 
@@ -527,7 +520,7 @@ proc contains*(s: LuaStack; i: LuaStack): bool =
 
 proc contains*(s: LuaStack; i: string): bool =
   assert s != nil
-  assert s.kind == TTable
+  s.value.expectKind TTable
   result = contains(s, TString.newLuaStack(i))
 
 proc contains*(t: TableRef[LuaStack, LuaStack]; s: LuaStack): bool =
@@ -538,7 +531,7 @@ proc contains*(t: TableRef[LuaStack, LuaStack]; s: LuaStack): bool =
 when false:
   proc `[]`*(s: LuaStack; index: LuaStack): LuaStack =
     assert s != nil
-    assert s.kind == TTable
+    s.value.expectKind TTable
     assert index != nil
     assert index.kind != TNil
 
@@ -563,7 +556,7 @@ when false:
   proc `[]`*(s: LuaStack; index: string): LuaStack =
     assert s != nil
     s.read
-    assert s.kind == TTable
+    s.value.expectKind TTable
     for kind in stringLovers.items:
       let find = kind.newLuaStack(index)
       if find in s:
