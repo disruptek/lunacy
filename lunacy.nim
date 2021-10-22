@@ -190,21 +190,23 @@ proc isInteger*(value: LuaValue): bool =
 func isInteger*(s: LuaStack): bool =
   s.value.isInteger
 
+converter toInteger*(value: LuaValue): int =
+  value.expectKind TNumber
+  if not value.isInteger:
+    raise ValueError.newException &"no integer for `{value}`"
+  result = value.integer
+
 converter toInteger*(s: LuaStack): int =
   assert s != nil
-  s.value.expectKind TNumber
-  if not s.isInteger:
-    raise ValueError.newException &"no integer for `{s}`"
-  result = s.value.integer
-
-converter toFloat*(s: LuaStack): float =
-  assert s != nil
-  s.value.expectKind TNumber
-  result = s.value.number
+  result = s.value.toInteger
 
 converter toFloat*(value: LuaValue): float =
   value.expectKind TNumber
   result = value.number
+
+converter toFloat*(s: LuaStack): float =
+  assert s != nil
+  result = s.value.toFLoat
 
 proc clean*(s: LuaStack): bool =
   result = s.pos.address == cleanAddress
