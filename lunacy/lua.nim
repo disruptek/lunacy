@@ -42,8 +42,8 @@ when defined(lunacyLuaJIT):
       LibName* = "libluajit.dylib"
   elif defined(UNIX):
     const
-      Name* = "libluajit.so(|.0)"
-      LibName* = "libluajit.so(|.0)"
+      Name* = "libluajit.so(|.2|.0)"
+      LibName* = "libluajit.so(|.2|.0)"
   else:
     const
       Name* = "luajit.dll"
