@@ -281,6 +281,7 @@ proc newLuaStack*(kind: ValidLuaType; pos: LuaStackAddress): LuaStack =
     of TUserData:       LuaStack(value: LuaValue(kind: TUserData))
     of TBoolean:        LuaStack(value: LuaValue(kind: TBoolean))
     of TNil:            LuaStack(value: LuaValue(kind: TNil))
+    of TFunction:       LuaStack(value: LuaValue(kind: TFunction))
     else:
       raise ValueError.newException &"bad input: {kind}"
   result.init
