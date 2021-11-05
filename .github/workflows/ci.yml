@@ -53,6 +53,11 @@ jobs:
           path: nim
           version: ${{ matrix.nim }}
 
+      - name: Setup Lua
+        if: ${{ matrix.os }} == 'ubuntu-latest'
+        run: |
+          sudo apt-get install -y libluajit-5.1-dev liblua5.1-0-dev
+
       - name: Run tests
         shell: bash
         run: |
