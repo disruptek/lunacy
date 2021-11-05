@@ -31,7 +31,7 @@ jobs:
       matrix:
         #os: ['macos-latest', 'ubuntu-latest', 'windows-latest']
         os: ['ubuntu-latest']
-        nim: ['devel'] #, 'version-1-6']
+        nim: ['devel', 'version-1-6']
         #lua: ["5.1", "luajit-2.0.5"]
     #name: '${{ matrix.os }} (${{ matrix.nim }} / ${{ matrix.lua }})'
     name: '${{ matrix.os }} (${{ matrix.nim }})'
@@ -63,7 +63,6 @@ jobs:
         run: |
           cd ci
           nimble --accept develop
-          nimble --accept install "https://github.com/disruptek/balls"
           nimble test
 
       - name: Build docs
