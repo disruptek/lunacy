@@ -1,3 +1,5 @@
+import std/tables
+
 import pkg/balls
 
 import lunacy
@@ -61,3 +63,10 @@ suite "lunacy":
       discard lua: much `garbage`
     except LuaError as e:
       check e.msg == """[string "much `garbage`"]:1: '=' expected near '`'"""
+
+  block:
+    ## table conversion
+    let fabulous = {"a": 1, "b": 2}.toTable
+    let table = fabulous.toLuaValue
+    check table["a".toLuaValue] == 1.toLuaValue
+    check table["b".toLuaValue] == 2.toLuaValue
