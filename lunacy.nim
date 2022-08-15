@@ -129,7 +129,7 @@ type
     ltDotDotDot = "..."
 
 proc `$`*(s: LuaStack): string
-proc `$`*(value: LuaValue): string
+func `$`*(value: LuaValue): string
 
 proc popStack*(p: PState; expand = true): LuaStack
 
@@ -163,7 +163,7 @@ macro lua*(ast: untyped): PState =
 template L*(s: LuaStack): PState = s.pos.L
 template address*(s: LuaStack): LuaStackAddressValue = s.pos.address
 
-proc hash*(s: LuaStack): Hash
+func hash*(s: LuaStack): Hash
 
 converter toCint*(si: int): cint =
   si.cint
@@ -213,14 +213,14 @@ proc clean*(s: LuaStack): bool =
 
 template dirty*(s: LuaStack): bool = not s.clean
 
-proc hash*(tab: Table[LuaStack, LuaStack]): Hash =
+func hash*(tab: Table[LuaStack, LuaStack]): Hash =
   var h: Hash = 0
   for key, value in tab.pairs:
     h = h !& key.hash
     h = h !& value.hash
   result = !$h
 
-proc hash*(v: LuaValue): Hash =
+func hash*(v: LuaValue): Hash =
   var h: Hash = 0
   h = h !& v.kind.hash
   case v.kind
@@ -236,22 +236,30 @@ proc hash*(v: LuaValue): Hash =
     discard
   result = !$h
 
-proc hash*(s: LuaStack): Hash =
+func hash*(s: LuaStack): Hash =
   hash(s.value)
 
-proc `==`*(a, b: LuaStack): bool =
+func `==`*(a, b: LuaStack): bool =
   if a.isNil or b.isNil:
     a.isNil and b.isNil
   else:
     a.hash == b.hash
 
-proc `==`*(a, b: LuaValue): bool =
+func `==`*(a, b: LuaValue): bool =
   if a.kind == b.kind:
     a.hash == b.hash
   else:
     false
 
-proc `$`*(a: LuaStackAddress): string =
+func `<`*(a, b: LuaValue): bool =
+  if {a.kind, b.kind} == {TNumber}:
+    a.number < b.number
+  elif a.kind == b.kind:
+    a.hash < b.hash
+  else:
+    a.kind < b.kind
+
+func `$`*(a: LuaStackAddress): string =
   result = &"[{a.address}]"
 
 proc init(s: var LuaStack) =
@@ -459,7 +467,7 @@ proc len*(s: LuaStack): int {.deprecated.} =
   of TNone, TNil, TInvalid:
     discard
 
-proc `$`*(value: LuaValue): string =
+func `$`*(value: LuaValue): string =
   case value.kind
   of TString:
     result.add value.strung
