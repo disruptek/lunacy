@@ -64,7 +64,7 @@ jobs:
           cd ci
           nimble --accept develop
           nimble --accept install "https://github.com/disruptek/balls"
-          nimble test
+          balls --path="."
 
       - name: Build docs
         if: ${{ matrix.docs }} == 'true'
