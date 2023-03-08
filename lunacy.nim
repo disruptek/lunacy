@@ -630,7 +630,8 @@ proc toLuaValue*[K, V](a: TableLike[K, V]): LuaValue =
   for key, value in a.pairs:
     result[key.toLuaValue] = value.toLuaValue
 
-proc push*(L: PState; value: LuaValue): LuaStack =
+proc push*(L: PState; value: LuaValue) =
+  ## push a LuaValue onto the stack
   case value.kind
   of TBoolean:
     L.pushBoolean value.truthy.cint
@@ -645,11 +646,8 @@ proc push*(L: PState; value: LuaValue): LuaStack =
     # FIXME: exploit createTable()?
     L.newTable
     for key, value in value.table.pairs:
-      discard L.push key
-      discard L.push value
+      L.push key
+      L.push value
       L.setTable -3
   else:
     raise LuaError.newException "not implemented"
-  let pos = L.last
-  assert pos.readValidType == value.kind
-  result = newLuaStack(value.kind, pos)
