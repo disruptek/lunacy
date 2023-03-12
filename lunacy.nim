@@ -637,7 +637,7 @@ proc push*(L: PState; value: LuaValue) =
     L.pushBoolean value.truthy.cint
   of TString:
     # ensure we can push a string with an embedded nil
-    L.pushLString(value.strung, value.strung.len)
+    L.pushLString(value.strung.cstring, value.strung.len)
   of TNil:
     L.pushNil
   of TNumber:

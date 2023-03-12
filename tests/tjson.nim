@@ -13,28 +13,27 @@ suite "lunacy versus json":
     ## primitives
     var s: LuaStack
 
-    s = L.push toLuaValue(newJString"goats")
-    read s
+    L.push toLuaValue(newJString"goats")
+    s = L.popStack(expand = true)
     check $s == "goats"
 
-    s = L.push 42.newJInt.toLuaValue
-    read s
+    L.push 42.newJInt.toLuaValue
+    s = L.popStack(expand = true)
     check s.toInteger == 42
 
-    s = L.push newJFloat(42.0).toLuaValue
-    read s
+    L.push newJFloat(42.0).toLuaValue
+    s = L.popStack(expand = true)
     check s.toFloat == 42.0
 
-    s = L.push newJNull().toLuaValue
-    read s
+    L.push newJNull().toLuaValue
+    s = L.popStack(expand = true)
     check s.kind == TNil
 
   block:
     ## arrays
     let arr = %* ["goats", "pigs", "horses"]
-    var s: LuaStack
-    s = L.push arr.toLuaValue
-    read s
+    L.push arr.toLuaValue
+    var s = L.popStack(expand = true)
     check s.kind == TTable
     check s.value.table.len == arr.elems.len
     for index, value in arr.elems.pairs:
@@ -43,9 +42,8 @@ suite "lunacy versus json":
   block:
     ## tables
     let tab = %* {"goats": 6.5, "pigs": 3.2, "horses": 1.1}
-    var s: LuaStack
-    s = L.push tab.toLuaValue
-    read s
+    L.push tab.toLuaValue
+    var s = L.popStack(expand = true)
     check s.kind == TTable
     check s.value.table.len == tab.len
     for key, value in tab.pairs:
