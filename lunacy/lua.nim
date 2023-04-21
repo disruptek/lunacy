@@ -486,6 +486,27 @@ type
 
 
 {.push callConv: cdecl, dynlib: lua.LibName.}
+
+when defined(lunacyLuaJIT):
+  {.push importc: "luaJIT_$1".}
+  type
+    LuaJitMode* = enum
+      Engine          = (0x0000, "set mode for whole JIT engine")
+      Debug           = (0x0001, "set debug mode (idx = level)")
+      Function        = (0x0002, "change mode for a function")
+      AllFunctions    = (0x0003, "recurse into subroutine protos")
+      AllSubroutines  = (0x0004, "change only the subroutines")
+      Trace           = (0x0005, "flush a compiled trace")
+      WrapCFunctions  = (0x0010, "set wrapper mode for C function calls")
+
+  const
+    LuaJitModeOff*: cint   = 0x0000 ## turn feature off
+    LuaJitModeOn*: cint    = 0x0100 ## turn feature on
+    LuaJitModeFlush*: cint = 0x0200 ## flush JIT-compiled code
+
+  proc setmode*(state: PState; idx: cint; mode: cint): cint
+  {.pop.}
+
 {.push importc: "luaL_$1".}
 
 proc openlib*(state: PState, libname: cstring, lr: Preg, nup: cint)
