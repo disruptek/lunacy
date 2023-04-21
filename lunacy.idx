@@ -1,0 +1,69 @@
+nimTitle	lunacy	lunacy.html	module lunacy		0
+nim	LuaError	lunacy.html#LuaError	object LuaError		36
+nim	ValidLuaType	lunacy.html#ValidLuaType	type ValidLuaType		37
+nim	LuaStackAddress	lunacy.html#LuaStackAddress	object LuaStackAddress		40
+nim	LuaStack	lunacy.html#LuaStack	type LuaStack		44
+nim	LuaValue	lunacy.html#LuaValue	object LuaValue		50
+nim	`$`	lunacy.html#$,LuaStack	proc `$`(s: LuaStack): string		131
+nim	`$`	lunacy.html#$,LuaValue	proc `$`(value: LuaValue): string		132
+nim	popStack	lunacy.html#popStack,PState	proc popStack(p: PState; expand = true): LuaStack		134
+nim	checkLua	lunacy.html#checkLua.m,PState,typed,typed	macro checkLua(p: PState; c: typed; logic: typed)		140
+nim	lua	lunacy.html#lua.m,untyped	macro lua(ast: untyped): PState		148
+nim	L	lunacy.html#L.t,LuaStack	template L(s: LuaStack): PState		163
+nim	address	lunacy.html#address.t,LuaStack	template address(s: LuaStack): LuaStackAddressValue		164
+nim	hash	lunacy.html#hash,LuaStack	proc hash(s: LuaStack): Hash		166
+nim	toCint	lunacy.html#toCint.c,int	converter toCint(si: int): cint		168
+nim	kind	lunacy.html#kind,LuaStack	proc kind(s: LuaStack): LuaType		171
+nim	isInteger	lunacy.html#isInteger,LuaValue	proc isInteger(value: LuaValue): bool		183
+nim	isInteger	lunacy.html#isInteger,LuaStack	proc isInteger(s: LuaStack): bool		190
+nim	toInteger	lunacy.html#toInteger.c,LuaValue	converter toInteger(value: LuaValue): int		193
+nim	toInteger	lunacy.html#toInteger.c,LuaStack	converter toInteger(s: LuaStack): int		199
+nim	toFloat	lunacy.html#toFloat.c,LuaValue	converter toFloat(value: LuaValue): float		203
+nim	toFloat	lunacy.html#toFloat.c,LuaStack	converter toFloat(s: LuaStack): float		207
+nim	clean	lunacy.html#clean,LuaStack	proc clean(s: LuaStack): bool		211
+nim	dirty	lunacy.html#dirty.t,LuaStack	template dirty(s: LuaStack): bool		214
+nim	hash	lunacy.html#hash,Table[LuaStack,LuaStack]	proc hash(tab: Table[LuaStack, LuaStack]): Hash		216
+nim	hash	lunacy.html#hash,LuaValue	proc hash(v: LuaValue): Hash		223
+nim	`==`	lunacy.html#==,LuaStack,LuaStack	proc `==`(a, b: LuaStack): bool		242
+nim	`==`	lunacy.html#==,LuaValue,LuaValue	proc `==`(a, b: LuaValue): bool		248
+nim	`<`	lunacy.html#<,LuaValue,LuaValue	proc `<`(a, b: LuaValue): bool		254
+nim	`$`	lunacy.html#$,LuaStackAddress	proc `$`(a: LuaStackAddress): string		262
+nim	newLuaStack	lunacy.html#newLuaStack,ValidLuaType,LuaStackAddress	proc newLuaStack(kind: ValidLuaType; pos: LuaStackAddress): LuaStack		279
+nim	readValidType	lunacy.html#readValidType,LuaStackAddress	proc readValidType(pos: LuaStackAddress): ValidLuaType		330
+nim	`[]=`	lunacy.html#[]=,LuaValue,LuaValue,LuaValue	proc `[]=`(table: var LuaValue; key: LuaValue; value: LuaValue)		338
+nim	`[]`	lunacy.html#[],LuaValue,LuaValue	proc `[]`(table: var LuaValue; key: LuaValue): var LuaValue		342
+nim	`[]`	lunacy.html#[],LuaValue,LuaValue_2	proc `[]`(table: LuaValue; key: LuaValue): LuaValue		346
+nim	read	lunacy.html#read,LuaStack	proc read(s: var LuaStack)		350
+nim	read	lunacy.html#read,LuaStack_2	proc read(s: LuaStack)		352
+nim	read	lunacy.html#read,LuaStack,cint	proc read(s: LuaStack; index: cint): LuaStack		359
+nim	len	lunacy.html#len,LuaStack	proc len(s: LuaStack): int		452
+nim	`$`	lunacy.html#$,LuaStack_2	proc `$`(s: var LuaStack): string		511
+nim	contains	lunacy.html#contains,LuaStack,LuaStack	proc contains(s: LuaStack; i: LuaStack): bool		520
+nim	contains	lunacy.html#contains,LuaStack,string	proc contains(s: LuaStack; i: string): bool		532
+nim	contains	lunacy.html#contains,TableRef[LuaStack,LuaStack],LuaStack	proc contains(t: TableRef[LuaStack, LuaStack]; s: LuaStack): bool		537
+nim	last	lunacy.html#last,PState	proc last(L: PState): LuaStackAddress		579
+nim	last	lunacy.html#last,LuaStack	proc last(s: LuaStack): LuaStack		582
+nim	pop	lunacy.html#pop,LuaStack	proc pop(s: LuaStack): LuaStack		595
+nim	pop	lunacy.html#pop,LuaStack_2	proc pop(s: var LuaStack; expand = true): LuaStack		599
+nim	nilLuaValue	lunacy.html#nilLuaValue	proc nilLuaValue(): LuaValue		603
+nim	noneLuaValue	lunacy.html#noneLuaValue	proc noneLuaValue(): LuaValue		604
+nim	luaValueTable	lunacy.html#luaValueTable	proc luaValueTable(): LuaValue		605
+nim	toLuaValue	lunacy.html#toLuaValue,int	proc toLuaValue(i: int): LuaValue		607
+nim	toLuaValue	lunacy.html#toLuaValue,float	proc toLuaValue(f: float): LuaValue		610
+nim	toLuaValue	lunacy.html#toLuaValue,string	proc toLuaValue(s: string): LuaValue		613
+nim	toLuaValue	lunacy.html#toLuaValue,bool	proc toLuaValue(b: bool): LuaValue		616
+nim	toLuaValue	lunacy.html#toLuaValue,openArray[T]	proc toLuaValue[T](a: openArray[T]): LuaValue		619
+nim	toLuaValue	lunacy.html#toLuaValue,TableLike[K,V]	proc toLuaValue[K, V](a: TableLike[K, V]): LuaValue		628
+nim	push	lunacy.html#push,PState,LuaValue	proc push(L: PState; value: LuaValue)		633
+nimgrp	contains	lunacy.html#contains-procs-all	proc		520
+nimgrp	toluavalue	lunacy.html#toLuaValue-procs-all	proc		607
+nimgrp	$	lunacy.html#$-procs-all	proc		131
+nimgrp	last	lunacy.html#last-procs-all	proc		579
+nimgrp	read	lunacy.html#read-procs-all	proc		350
+nimgrp	isinteger	lunacy.html#isInteger-procs-all	proc		183
+nimgrp	hash	lunacy.html#hash-procs-all	proc		166
+nimgrp	==	lunacy.html#==-procs-all	proc		242
+nimgrp	[]	lunacy.html#[]-procs-all	proc		342
+nimgrp	pop	lunacy.html#pop-procs-all	proc		595
+nimgrp	tofloat	lunacy.html#toFloat-converters-all	converter		203
+nimgrp	tointeger	lunacy.html#toInteger-converters-all	converter		193

@@ -1,0 +1,232 @@
+nimTitle	lua	lunacy/lua.html	module lunacy/lua		0
+nim	Name	lunacy/lua.html#Name	const Name		58
+nim	LibName	lunacy/lua.html#LibName	const LibName		59
+nim	CoLibName	lunacy/lua.html#CoLibName	const CoLibName		66
+nim	TabLibName	lunacy/lua.html#TabLibName	const TabLibName		67
+nim	IoLibName	lunacy/lua.html#IoLibName	const IoLibName		68
+nim	OsLibName	lunacy/lua.html#OsLibName	const OsLibName		69
+nim	StrLibName	lunacy/lua.html#StrLibName	const StrLibName		70
+nim	MathLibName	lunacy/lua.html#MathLibName	const MathLibName		71
+nim	DbLibName	lunacy/lua.html#DbLibName	const DbLibName		72
+nim	LoadLibName	lunacy/lua.html#LoadLibName	const LoadLibName		73
+nim	Version	lunacy/lua.html#Version	const Version		75
+nim	Release	lunacy/lua.html#Release	const Release		76
+nim	VersionNum	lunacy/lua.html#VersionNum	const VersionNum		77
+nim	Copyright	lunacy/lua.html#Copyright	const Copyright		78
+nim	Authors	lunacy/lua.html#Authors	const Authors		79
+nim	MultRet	lunacy/lua.html#MultRet	const MultRet		81
+nim	RegistryIndex	lunacy/lua.html#RegistryIndex	const RegistryIndex		84
+nim	EnvironIndex	lunacy/lua.html#EnvironIndex	const EnvironIndex		85
+nim	GlobalsIndex	lunacy/lua.html#GlobalsIndex	const GlobalsIndex		86
+nim	NoRef	lunacy/lua.html#NoRef	const NoRef		88
+nim	RefNil	lunacy/lua.html#RefNil	const RefNil		89
+nim	minStack	lunacy/lua.html#minStack	const minStack		91
+nim	BufferSize	lunacy/lua.html#BufferSize	const BufferSize		95
+nim	Chunkreader	lunacy/lua.html#Chunkreader	type Chunkreader		98
+nim	Chunkwriter	lunacy/lua.html#Chunkwriter	type Chunkwriter		99
+nim	Buffer	lunacy/lua.html#Buffer	object Buffer		100
+nim	PBuffer	lunacy/lua.html#PBuffer	type PBuffer		106
+nim	PState	lunacy/lua.html#PState	type PState		108
+nim	CFunction	lunacy/lua.html#CFunction	type CFunction		109
+nim	Reader	lunacy/lua.html#Reader	type Reader		115
+nim	Writer	lunacy/lua.html#Writer	type Writer		116
+nim	Alloc	lunacy/lua.html#Alloc	type Alloc		117
+nim	ThreadStatus	lunacy/lua.html#ThreadStatus	enum ThreadStatus		119
+nim	Number	lunacy/lua.html#Number	type Number		127
+nim	Integer	lunacy/lua.html#Integer	type Integer		128
+nim	LuaType	lunacy/lua.html#LuaType	enum LuaType		130
+nim	newstate	lunacy/lua.html#newstate,Alloc,pointer	proc newstate(f: Alloc; ud: pointer): PState		152
+nim	close	lunacy/lua.html#close,PState	proc close(state: PState)		154
+nim	newthread	lunacy/lua.html#newthread,PState	proc newthread(state: PState): PState		155
+nim	atpanic	lunacy/lua.html#atpanic,PState,CFunction	proc atpanic(state: PState; panicf: CFunction): CFunction		156
+nim	gettop	lunacy/lua.html#gettop,PState	proc gettop(state: PState): cint		158
+nim	settop	lunacy/lua.html#settop,PState,cint	proc settop(state: PState; idx: cint)		159
+nim	pushvalue	lunacy/lua.html#pushvalue,PState,cint	proc pushvalue(state: PState; Idx: cint)		160
+nim	remove	lunacy/lua.html#remove,PState,cint	proc remove(state: PState; idx: cint)		161
+nim	insert	lunacy/lua.html#insert,PState,cint	proc insert(state: PState; idx: cint)		162
+nim	replace	lunacy/lua.html#replace,PState,cint	proc replace(state: PState; idx: cint)		163
+nim	checkstack	lunacy/lua.html#checkstack,PState,cint	proc checkstack(state: PState; sz: cint): cint		164
+nim	xmove	lunacy/lua.html#xmove,PState,PState,cint	proc xmove(from, to: PState; n: cint)		165
+nim	isnumber	lunacy/lua.html#isnumber,PState,cint	proc isnumber(state: PState; idx: cint): cint		166
+nim	iscfunction	lunacy/lua.html#iscfunction,PState,cint	proc iscfunction(state: PState; idx: cint): cint		168
+nim	isuserdata	lunacy/lua.html#isuserdata,PState,cint	proc isuserdata(state: PState; idx: cint): cint		169
+nim	luatype	lunacy/lua.html#luatype,PState,cint	proc luatype(state: PState; idx: cint): cint		170
+nim	typename	lunacy/lua.html#typename,PState,cint	proc typename(state: PState; tp: cint): cstring		171
+nim	equal	lunacy/lua.html#equal,PState,cint,cint	proc equal(state: PState; idx1, idx2: cint): cint		172
+nim	rawequal	lunacy/lua.html#rawequal,PState,cint,cint	proc rawequal(state: PState; idx1, idx2: cint): cint		173
+nim	lessthan	lunacy/lua.html#lessthan,PState,cint,cint	proc lessthan(state: PState; idx1, idx2: cint): cint		174
+nim	tonumber	lunacy/lua.html#tonumber,PState,cint	proc tonumber(state: PState; idx: cint): Number		175
+nim	tointeger	lunacy/lua.html#tointeger,PState,cint	proc tointeger(state: PState; idx: cint): Integer		176
+nim	numbertointeger	lunacy/lua.html#numbertointeger,Number,ptr.Integer	proc numbertointeger(n: Number; p: ptr Integer): cint		177
+nim	toboolean	lunacy/lua.html#toboolean,PState,cint	proc toboolean(state: PState; idx: cint): cint		178
+nim	tolstring	lunacy/lua.html#tolstring,PState,cint,ptr.cint	proc tolstring(state: PState; idx: cint; length: ptr cint): cstring		179
+nim	objlen	lunacy/lua.html#objlen,PState,cint	proc objlen(state: PState; idx: cint): cint		180
+nim	tocfunction	lunacy/lua.html#tocfunction,PState,cint	proc tocfunction(state: PState; idx: cint): CFunction		181
+nim	touserdata	lunacy/lua.html#touserdata,PState,cint	proc touserdata(state: PState; idx: cint): pointer		182
+nim	tothread	lunacy/lua.html#tothread,PState,cint	proc tothread(state: PState; idx: cint): PState		183
+nim	topointer	lunacy/lua.html#topointer,PState,cint	proc topointer(state: PState; idx: cint): pointer		184
+nim	pushnil	lunacy/lua.html#pushnil,PState	proc pushnil(state: PState)		185
+nim	pushnumber	lunacy/lua.html#pushnumber,PState,Number	proc pushnumber(state: PState; n: Number)		186
+nim	pushinteger	lunacy/lua.html#pushinteger,PState,Integer	proc pushinteger(state: PState; n: Integer)		187
+nim	pushlstring	lunacy/lua.html#pushlstring,PState,cstring,cint	proc pushlstring(state: PState; s: cstring; len: cint)		188
+nim	pushstring	lunacy/lua.html#pushstring,PState,cstring	proc pushstring(state: PState; s: cstring)		189
+nim	pushvfstring	lunacy/lua.html#pushvfstring,PState,cstring,pointer	proc pushvfstring(state: PState; fmt: cstring; argp: pointer): cstring		190
+nim	pushfstring	lunacy/lua.html#pushfstring,PState,cstring	proc pushfstring(state: PState; fmt: cstring): cstring		191
+nim	pushcclosure	lunacy/lua.html#pushcclosure,PState,CFunction,cint	proc pushcclosure(state: PState; fn: CFunction; n: cint)		192
+nim	pushboolean	lunacy/lua.html#pushboolean,PState,cint	proc pushboolean(state: PState; b: cint)		193
+nim	pushlightuserdata	lunacy/lua.html#pushlightuserdata,PState,pointer	proc pushlightuserdata(state: PState; p: pointer)		194
+nim	pushthread	lunacy/lua.html#pushthread,PState	proc pushthread(state: PState)		195
+nim	gettable	lunacy/lua.html#gettable,PState,cint	proc gettable(state: PState; idx: cint)		196
+nim	getfield	lunacy/lua.html#getfield,PState,cint,cstring	proc getfield(L: PState; idx: cint; k: cstring)		197
+nim	rawget	lunacy/lua.html#rawget,PState,cint	proc rawget(state: PState; idx: cint)		198
+nim	rawgeti	lunacy/lua.html#rawgeti,PState,cint,cint	proc rawgeti(state: PState; idx, n: cint)		199
+nim	createtable	lunacy/lua.html#createtable,PState,cint,cint	proc createtable(state: PState; narr, nrec: cint)		200
+nim	newuserdata	lunacy/lua.html#newuserdata,PState,cint	proc newuserdata(state: PState; sz: cint): pointer		201
+nim	getmetatable	lunacy/lua.html#getmetatable,PState,cint	proc getmetatable(state: PState; objindex: cint): cint		202
+nim	getfenv	lunacy/lua.html#getfenv,PState,cint	proc getfenv(state: PState; idx: cint)		203
+nim	settable	lunacy/lua.html#settable,PState,cint	proc settable(state: PState; idx: cint)		204
+nim	setfield	lunacy/lua.html#setfield,PState,cint,cstring	proc setfield(state: PState; idx: cint; k: cstring)		205
+nim	rawset	lunacy/lua.html#rawset,PState,cint	proc rawset(state: PState; idx: cint)		206
+nim	rawseti	lunacy/lua.html#rawseti,PState,cint,cint	proc rawseti(state: PState; idx, n: cint)		207
+nim	setmetatable	lunacy/lua.html#setmetatable,PState,cint	proc setmetatable(state: PState; objindex: cint): cint		208
+nim	setfenv	lunacy/lua.html#setfenv,PState,cint	proc setfenv(state: PState; idx: cint): cint		209
+nim	call	lunacy/lua.html#call,PState,cint,cint	proc call(state: PState; nargs, nresults: cint)		210
+nim	pcall	lunacy/lua.html#pcall,PState,cint,cint,cint	proc pcall(state: PState; nargs, nresults, errf: cint): cint		211
+nim	cpcall	lunacy/lua.html#cpcall,PState,CFunction,pointer	proc cpcall(state: PState; funca: CFunction; ud: pointer): cint		212
+nim	load	lunacy/lua.html#load,PState,Reader,pointer,cstring	proc load(state: PState; reader: Reader; dt: pointer; chunkname: cstring): cint		213
+nim	dump	lunacy/lua.html#dump,PState,Writer,pointer	proc dump(state: PState; writer: Writer; data: pointer): cint		214
+nim	luayield	lunacy/lua.html#luayield,PState,cint	proc luayield(state: PState; nresults: cint): cint		215
+nim	resume	lunacy/lua.html#resume,PState,cint	proc resume(state: PState; narg: cint): cint		216
+nim	status	lunacy/lua.html#status,PState	proc status(state: PState): cint		217
+nim	gc	lunacy/lua.html#gc,PState,cint,cint	proc gc(state: PState; what, data: cint): cint		218
+nim	error	lunacy/lua.html#error,PState	proc error(state: PState): cint		219
+nim	next	lunacy/lua.html#next,PState,cint	proc next(state: PState; idx: cint): cint		220
+nim	concat	lunacy/lua.html#concat,PState,cint	proc concat(state: PState; n: cint)		221
+nim	getallocf	lunacy/lua.html#getallocf,PState,ptr.pointer	proc getallocf(state: PState; ud: ptr pointer): Alloc		222
+nim	setallocf	lunacy/lua.html#setallocf,PState,Alloc,pointer	proc setallocf(state: PState; f: Alloc; ud: pointer)		223
+nim	GcStop	lunacy/lua.html#GcStop	const GcStop		231
+nim	GcRestart	lunacy/lua.html#GcRestart	const GcRestart		232
+nim	GcCollect	lunacy/lua.html#GcCollect	const GcCollect		233
+nim	GcCount	lunacy/lua.html#GcCount	const GcCount		234
+nim	GcCountB	lunacy/lua.html#GcCountB	const GcCountB		235
+nim	GcStep	lunacy/lua.html#GcStep	const GcStep		236
+nim	GcSetPause	lunacy/lua.html#GcSetPause	const GcSetPause		237
+nim	GcSetStepMul	lunacy/lua.html#GcSetStepMul	const GcSetStepMul		238
+nim	pop	lunacy/lua.html#pop,PState	proc pop(state: PState; n = cint 1)		246
+nim	newtable	lunacy/lua.html#newtable,PState	proc newtable(state: PState)		247
+nim	register	lunacy/lua.html#register,PState,cstring,CFunction	proc register(state: PState; n: cstring; f: CFunction)		248
+nim	pushcfunction	lunacy/lua.html#pushcfunction,PState,CFunction	proc pushcfunction(state: PState; f: CFunction)		249
+nim	strlen	lunacy/lua.html#strlen,PState,cint	proc strlen(state: PState; i: cint): cint		250
+nim	isfunction	lunacy/lua.html#isfunction,PState,cint	proc isfunction(state: PState; n: cint): bool		251
+nim	isstring	lunacy/lua.html#isstring,PState,cint	proc isstring(state: PState; n: cint): bool		252
+nim	istable	lunacy/lua.html#istable,PState,cint	proc istable(state: PState; n: cint): bool		253
+nim	islightuserdata	lunacy/lua.html#islightuserdata,PState,cint	proc islightuserdata(state: PState; n: cint): bool		254
+nim	isnil	lunacy/lua.html#isnil,PState,cint	proc isnil(state: PState; n: cint): bool		255
+nim	isboolean	lunacy/lua.html#isboolean,PState,cint	proc isboolean(state: PState; n: cint): bool		256
+nim	isthread	lunacy/lua.html#isthread,PState,cint	proc isthread(state: PState; n: cint): bool		257
+nim	isnone	lunacy/lua.html#isnone,PState,cint	proc isnone(state: PState; n: cint): bool		258
+nim	isnoneornil	lunacy/lua.html#isnoneornil,PState,cint	proc isnoneornil(state: PState; n: cint): bool		259
+nim	pushliteral	lunacy/lua.html#pushliteral,PState,cstring	proc pushliteral(state: PState; s: cstring)		260
+nim	setglobal	lunacy/lua.html#setglobal,PState,cstring	proc setglobal(state: PState; s: cstring)		261
+nim	getglobal	lunacy/lua.html#getglobal,PState,cstring	proc getglobal(state: PState; s: cstring)		262
+nim	tostring	lunacy/lua.html#tostring,PState,cint	proc tostring(state: PState; i: cint): cstring		263
+nim	getregistry	lunacy/lua.html#getregistry,PState	proc getregistry(state: PState)		268
+nim	getgccount	lunacy/lua.html#getgccount,PState	proc getgccount(state: PState): cint		269
+nim	HookCall	lunacy/lua.html#HookCall	const HookCall		278
+nim	HookRet	lunacy/lua.html#HookRet	const HookRet		279
+nim	HookLine	lunacy/lua.html#HookLine	const HookLine		280
+nim	HookCount	lunacy/lua.html#HookCount	const HookCount		281
+nim	HookTailRet	lunacy/lua.html#HookTailRet	const HookTailRet		282
+nim	MaskCall	lunacy/lua.html#MaskCall	const MaskCall		284
+nim	MaskRet	lunacy/lua.html#MaskRet	const MaskRet		285
+nim	MaskLine	lunacy/lua.html#MaskLine	const MaskLine		286
+nim	MaskCount	lunacy/lua.html#MaskCount	const MaskCount		287
+nim	IdSize	lunacy/lua.html#IdSize	const IdSize		289
+nim	TDebug	lunacy/lua.html#TDebug	object TDebug		292
+nim	PDebug	lunacy/lua.html#PDebug	type PDebug		306
+nim	Hook	lunacy/lua.html#Hook	type Hook		307
+nim	getStack	lunacy/lua.html#getStack,PState,cint,PDebug	proc getStack(state: PState; level: cint; ar: PDebug): cint		317
+nim	getInfo	lunacy/lua.html#getInfo,PState,cstring,PDebug	proc getInfo(state: PState; what: cstring; ar: PDebug): cint		318
+nim	getLocal	lunacy/lua.html#getLocal,PState,PDebug,cint	proc getLocal(state: PState; ar: PDebug; n: cint): cstring		319
+nim	setLocal	lunacy/lua.html#setLocal,PState,PDebug,cint	proc setLocal(state: PState; ar: PDebug; n: cint): cstring		320
+nim	getUpValue	lunacy/lua.html#getUpValue,PState,cint,cint	proc getUpValue(state: PState; funcindex: cint; n: cint): cstring		321
+nim	setUpValue	lunacy/lua.html#setUpValue,PState,cint,cint	proc setUpValue(state: PState; funcindex: cint; n: cint): cstring		322
+nim	setHook	lunacy/lua.html#setHook,PState,Hook,cint,cint	proc setHook(state: PState; funca: Hook; mask: cint; count: cint): cint		323
+nim	getHook	lunacy/lua.html#getHook,PState	proc getHook(state: PState): Hook		324
+nim	getHookMask	lunacy/lua.html#getHookMask,PState	proc getHookMask(state: PState): cint		325
+nim	getHookCount	lunacy/lua.html#getHookCount,PState	proc getHookCount(state: PState): cint		326
+nim	toLuaType	lunacy/lua.html#toLuaType.c,cint	converter toLuaType(c: cint): LuaType		352
+nim	getEnviron	lunacy/lua.html#getEnviron,PState,cstring	proc getEnviron(state: PState; s: cstring)		391
+nim	open_base	lunacy/lua.html#open_base,PState	proc open_base(state: PState): cint		428
+nim	open_table	lunacy/lua.html#open_table,PState	proc open_table(state: PState): cint		429
+nim	open_io	lunacy/lua.html#open_io,PState	proc open_io(state: PState): cint		430
+nim	open_string	lunacy/lua.html#open_string,PState	proc open_string(state: PState): cint		431
+nim	open_math	lunacy/lua.html#open_math,PState	proc open_math(state: PState): cint		432
+nim	open_debug	lunacy/lua.html#open_debug,PState	proc open_debug(state: PState): cint		433
+nim	open_package	lunacy/lua.html#open_package,PState	proc open_package(state: PState): cint		434
+nim	openlibs	lunacy/lua.html#openlibs,PState	proc openlibs(state: PState)		435
+nim	baselibopen	lunacy/lua.html#baselibopen,PState	proc baselibopen(state: PState): bool		438
+nim	tablibopen	lunacy/lua.html#tablibopen,PState	proc tablibopen(state: PState): bool		441
+nim	iolibopen	lunacy/lua.html#iolibopen,PState	proc iolibopen(state: PState): bool		444
+nim	strlibopen	lunacy/lua.html#strlibopen,PState	proc strlibopen(state: PState): bool		447
+nim	mathlibopen	lunacy/lua.html#mathlibopen,PState	proc mathlibopen(state: PState): bool		450
+nim	dblibopen	lunacy/lua.html#dblibopen,PState	proc dblibopen(state: PState): bool		453
+nim	Treg	lunacy/lua.html#Treg	object Treg		481
+nim	Preg	lunacy/lua.html#Preg	type Preg		485
+nim	openlib	lunacy/lua.html#openlib,PState,cstring,Preg,cint	proc openlib(state: PState; libname: cstring; lr: Preg; nup: cint)		512
+nim	register	lunacy/lua.html#register,PState,cstring,Preg	proc register(state: PState; libname: cstring; lr: Preg)		513
+nim	getmetafield	lunacy/lua.html#getmetafield,PState,cint,cstring	proc getmetafield(state: PState; obj: cint; e: cstring): cint		515
+nim	callmeta	lunacy/lua.html#callmeta,PState,cint,cstring	proc callmeta(state: PState; obj: cint; e: cstring): cint		516
+nim	typerror	lunacy/lua.html#typerror,PState,cint,cstring	proc typerror(state: PState; narg: cint; tname: cstring): cint		517
+nim	argerror	lunacy/lua.html#argerror,PState,cint,cstring	proc argerror(state: PState; numarg: cint; extramsg: cstring): cint		518
+nim	checklstring	lunacy/lua.html#checklstring,PState,cint,ptr.int	proc checklstring(state: PState; numArg: cint; len: ptr int): cstring		519
+nim	optlstring	lunacy/lua.html#optlstring,PState,cint,cstring,ptr.cint	proc optlstring(state: PState; numArg: cint; def: cstring; len: ptr cint): cstring		520
+nim	checknumber	lunacy/lua.html#checknumber,PState,cint	proc checknumber(state: PState; numArg: cint): Number		521
+nim	optnumber	lunacy/lua.html#optnumber,PState,cint,Number	proc optnumber(state: PState; nArg: cint; def: Number): Number		522
+nim	checkinteger	lunacy/lua.html#checkinteger,PState,cint	proc checkinteger(state: PState; numArg: cint): Integer		523
+nim	optinteger	lunacy/lua.html#optinteger,PState,cint,Integer	proc optinteger(state: PState; nArg: cint; def: Integer): Integer		524
+nim	checkstack	lunacy/lua.html#checkstack,PState,cint,cstring	proc checkstack(state: PState; sz: cint; msg: cstring)		525
+nim	checktype	lunacy/lua.html#checktype,PState,cint,cint	proc checktype(state: PState; narg, t: cint)		526
+nim	checkany	lunacy/lua.html#checkany,PState,cint	proc checkany(state: PState; narg: cint)		528
+nim	newmetatable	lunacy/lua.html#newmetatable,PState,cstring	proc newmetatable(state: PState; tname: cstring): cint		529
+nim	checkudata	lunacy/lua.html#checkudata,PState,cint,cstring	proc checkudata(state: PState; ud: cint; tname: cstring): pointer		531
+nim	where	lunacy/lua.html#where,PState,cint	proc where(state: PState; lvl: cint)		532
+nim	error	lunacy/lua.html#error,PState,cstring	proc error(state: PState; fmt: cstring): cint		533
+nim	checkoption	lunacy/lua.html#checkoption,PState,cint,cstring,cstringArray	proc checkoption(state: PState; narg: cint; def: cstring; lst: cstringArray): cint		534
+nim	unref	lunacy/lua.html#unref,PState,cint,cint	proc unref(state: PState; t, theref: cint)		536
+nim	loadfile	lunacy/lua.html#loadfile,PState,cstring	proc loadfile(state: PState; filename: cstring): cint		537
+nim	loadbuffer	lunacy/lua.html#loadbuffer,PState,cstring,cint,cstring	proc loadbuffer(state: PState; buff: cstring; size: cint; name: cstring): cint		538
+nim	loadstring	lunacy/lua.html#loadstring,PState,cstring	proc loadstring(state: PState; s: cstring): cint		539
+nim	newstate	lunacy/lua.html#newstate	proc newstate(): PState		540
+nim	reference	lunacy/lua.html#reference,PState,cint	proc reference(state: PState; t: cint): cint		543
+nim	open	lunacy/lua.html#open	proc open(): PState		547
+nim	argcheck	lunacy/lua.html#argcheck,PState,bool,cint,cstring	proc argcheck(state: PState; cond: bool; numarg: cint; extramsg: cstring)		554
+nim	checkstring	lunacy/lua.html#checkstring,PState,cint	proc checkstring(state: PState; n: cint): cstring		555
+nim	optstring	lunacy/lua.html#optstring,PState,cint,cstring	proc optstring(state: PState; n: cint; d: cstring): cstring		556
+nim	checkint	lunacy/lua.html#checkint,PState,cint	proc checkint(state: PState; n: cint): cint		557
+nim	checklong	lunacy/lua.html#checklong,PState,cint	proc checklong(state: PState; n: cint): clong		558
+nim	optint	lunacy/lua.html#optint,PState,cint,float64	proc optint(state: PState; n: cint; d: float64): cint		559
+nim	optlong	lunacy/lua.html#optlong,PState,cint,float64	proc optlong(state: PState; n: cint; d: float64): clong		560
+nim	dofile	lunacy/lua.html#dofile,PState,cstring	proc dofile(state: PState; filename: cstring): cint		561
+nim	doString	lunacy/lua.html#doString,PState,cstring	proc doString(state: PState; str: cstring): cint		562
+nim	getmetatable	lunacy/lua.html#getmetatable,PState,cstring	proc getmetatable(state: PState; tname: cstring)		563
+nim	addchar	lunacy/lua.html#addchar,PBuffer,char	proc addchar(B: PBuffer; c: char)		571
+nim	putchar	lunacy/lua.html#putchar,PBuffer,char	proc putchar(B: PBuffer; c: char)		574
+nim	addsize	lunacy/lua.html#addsize,PBuffer,cint	proc addsize(B: PBuffer; n: cint)		576
+nim	buffinit	lunacy/lua.html#buffinit,PState,PBuffer	proc buffinit(state: PState; B: PBuffer)		579
+nim	prepbuffer	lunacy/lua.html#prepbuffer,PBuffer	proc prepbuffer(B: PBuffer): cstring		580
+nim	addlstring	lunacy/lua.html#addlstring,PBuffer,cstring,cint	proc addlstring(B: PBuffer; s: cstring; L: cint)		581
+nim	addstring	lunacy/lua.html#addstring,PBuffer,cstring	proc addstring(B: PBuffer; s: cstring)		582
+nim	addvalue	lunacy/lua.html#addvalue,PBuffer	proc addvalue(B: PBuffer)		583
+nim	pushresult	lunacy/lua.html#pushresult,PBuffer	proc pushresult(B: PBuffer)		584
+nim	gsub	lunacy/lua.html#gsub,PState,cstring,cstring,cstring	proc gsub(state: PState; s, p, r: cstring): cstring		585
+nim	findtable	lunacy/lua.html#findtable,PState,cint,cstring,cint	proc findtable(state: PState; idx: cint; fname: cstring; szhint: cint): cstring		586
+nim	unref	lunacy/lua.html#unref,PState,cint	proc unref(state: PState; theref: cint)		591
+nim	getref	lunacy/lua.html#getref,PState,cint	proc getref(state: PState; theref: cint)		592
+nim	getN	lunacy/lua.html#getN,PState,cint	proc getN(state: PState; n: cint): cint		602
+nimgrp	unref	lunacy/lua.html#unref-procs-all	proc		536
+nimgrp	checkstack	lunacy/lua.html#checkstack-procs-all	proc		164
+nimgrp	newstate	lunacy/lua.html#newstate-procs-all	proc		152
+nimgrp	register	lunacy/lua.html#register-procs-all	proc		248
+nimgrp	getmetatable	lunacy/lua.html#getmetatable-procs-all	proc		202
+nimgrp	error	lunacy/lua.html#error-procs-all	proc		219
